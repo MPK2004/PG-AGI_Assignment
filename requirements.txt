@@ -1,0 +1,11 @@
+sentence-transformers
+qdrant-client
+docling
+sqlmodel
+psycopg2-binary
+python-dotenv
+fastapi
+uvicorn
+python-multipart
+instructor
+google-generativeai
