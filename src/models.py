@@ -18,6 +18,7 @@ class Session(SQLModel, table=True):
 class Interaction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     interaction_id: str = Field(unique=True, index=True)
+    status: str = Field(default="processing") # processing, ready, failed
     
     session_id: Optional[int] = Field(
         default=None, 
@@ -25,10 +26,10 @@ class Interaction(SQLModel, table=True):
         ondelete="CASCADE"
     )
     
-    generated_question: str
-    reference_chunk: str
-    source_book: str
-    section_header: str
+    generated_question: Optional[str] = None
+    reference_chunk: Optional[str] = None
+    source_book: Optional[str] = None
+    section_header: Optional[str] = None
     
     candidate_answer: Optional[str] = None
     score: Optional[int] = None

@@ -7,7 +7,7 @@ import { useInterview } from "@/hooks/useInterview";
 export default function Home() {
   const [role, setRole] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const { startSession, isSubmitting } = useInterview();
+  const { startSession, isSubmitting, error } = useInterview();
   const router = useRouter();
 
   const handleStart = async () => {
@@ -24,6 +24,15 @@ export default function Home() {
         <h1>Walled Garden</h1>
         <p>A resilient environment for machine learning interviews. Mirroring backend state with persistent session management.</p>
         
+        {error && (
+          <div className="error-boundary" style={{ marginBottom: "2rem", marginTop: 0 }}>
+            <div>
+              <strong style={{ color: "var(--error)" }}>Initialization Error:</strong>
+              <p style={{ margin: "0.5rem 0", fontSize: "0.875rem" }}>{error}</p>
+            </div>
+          </div>
+        )}
+
         <div className="input-group">
           <label>Target Role</label>
           <input 

@@ -193,3 +193,138 @@ textarea:focus {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    rgba(51, 65, 85, 0.5) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 1.25rem;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-feedback {
+  height: 100px;
+  width: 100%;
+}
+
+/* Status Steps */
+.status-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.status-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  transition: all 0.3s ease;
+}
+
+.status-step.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.status-step.completed {
+  color: var(--success);
+}
+
+.status-step-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-step.active .status-step-icon {
+  border-color: var(--primary);
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+.status-step.completed .status-step-icon {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.error-boundary {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--error);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+/* Routing Transitions */
+.routing-transition {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  animation: slideDownIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.routing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.routing-drill-down {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
+}
+
+.routing-next-topic {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+}
+
+@keyframes slideDownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.routing-icon {
+  width: 14px;
+  height: 14px;
+}

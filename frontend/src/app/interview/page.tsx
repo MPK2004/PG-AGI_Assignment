@@ -1,13 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useInterview } from "@/hooks/useInterview";
 import { useRouter } from "next/navigation";
 
+const SUBMISSION_STEPS = [
+  "Evaluating your response...",
+  "Searching the knowledge base...",
+  "Contextualizing technical concepts...",
+  "Formulating the next scenario..."
+];
+
 export default function InterviewRoom() {
-  const { state, isSubmitting, submitAnswer, clearSession, isLoading } = useInterview();
+  const { state, isSubmitting, submitAnswer, clearSession, isLoading, error } = useInterview();
   const [answer, setAnswer] = useState("");
+  const [activeStep, setActiveStep] = useState(0);
   const router = useRouter();
+
+  // Cycle through submission steps to mask latency
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isSubmitting) {
+      setActiveStep(0);
+      interval = setInterval(() => {
+        setActiveStep((prev) => (prev < SUBMISSION_STEPS.length - 1 ? prev + 1 : prev));
+      }, 2500); // Change step every 2.5 seconds
+    }
+    return () => clearInterval(interval);
+  }, [isSubmitting]);
 
   if (isLoading) {
     return (
@@ -36,7 +56,9 @@ export default function InterviewRoom() {
   const handleSubmit = async () => {
     if (!answer.trim()) return;
     await submitAnswer(answer);
-    setAnswer("");
+    if (!error) {
+      setAnswer("");
+    }
   };
 
   const handleExit = () => {
@@ -66,33 +88,98 @@ export default function InterviewRoom() {
           </button>
         </div>
 
-        {state.feedback && (
-          <div className="feedback-area">
-            <label style={{ color: "var(--primary)", fontWeight: "bold", textTransform: "uppercase", fontSize: "0.75rem" }}>
-              Previous Evaluation
-            </label>
-            <p style={{ color: "white", marginTop: "0.5rem", marginBottom: "0.5rem", fontSize: "0.95rem" }}>
-              {state.feedback}
-            </p>
-            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-               <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>
-                Score: <strong style={{ color: "var(--success)" }}>{state.score}/10</strong>
-              </span>
-              <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>
-                Routing: <strong style={{ color: "var(--primary)" }}>{state.routing}</strong>
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Feedback Area with Skeleton */}
+        <div className="feedback-area" style={{ opacity: isSubmitting ? 0.5 : 1 }}>
+          <label style={{ color: "var(--primary)", fontWeight: "bold", textTransform: "uppercase", fontSize: "0.75rem" }}>
+            Previous Evaluation
+          </label>
+          {isSubmitting ? (
+            <div className="skeleton skeleton-feedback" style={{ marginTop: "1rem" }}></div>
+          ) : state.feedback ? (
+            <>
+              <p style={{ color: "white", marginTop: "0.5rem", marginBottom: "0.5rem", fontSize: "0.95rem" }}>
+                {state.feedback}
+              </p>
+              <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>
+                  Score: <strong style={{ color: "var(--success)" }}>{state.score}/10</strong>
+                </span>
+                <span style={{ fontSize: "0.75rem", color: "var(--text-dim)" }}>
+                  Routing: <strong style={{ color: "var(--primary)" }}>{state.routing}</strong>
+                </span>
+              </div>
+            </>
+          ) : (
+            <p style={{ marginTop: "0.5rem", fontStyle: "italic" }}>No feedback yet. Initial question.</p>
+          )}
+        </div>
 
+        {/* Question Area with Skeleton */}
         <div style={{ marginTop: "2rem" }}>
+          {!isSubmitting && state.routing && (
+            <div className="routing-transition">
+              {state.routing === "DRILL_DOWN" ? (
+                <div className="routing-badge routing-drill-down">
+                  <svg className="routing-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Following up on that...
+                </div>
+              ) : state.routing === "NEXT_TOPIC" ? (
+                <div className="routing-badge routing-next-topic">
+                  <svg className="routing-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <path d="M13 5l7 7-7 7M5 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Let&apos;s pivot to a new concept...
+                </div>
+              ) : null}
+            </div>
+          )}
+
           <label style={{ textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.05em" }}>
             Current Question
           </label>
-          <p className="question-text">{state.question}</p>
+          {isSubmitting ? (
+            <div style={{ marginTop: "1rem" }}>
+              <div className="skeleton skeleton-text" style={{ width: "90%" }}></div>
+              <div className="skeleton skeleton-text" style={{ width: "70%" }}></div>
+            </div>
+          ) : (
+            <p className="question-text">{state.question}</p>
+          )}
         </div>
 
-        <div className="input-group">
+        {/* Status Indicators during submission */}
+        {isSubmitting && (
+          <div className="status-steps">
+            {SUBMISSION_STEPS.map((step, idx) => (
+              <div 
+                key={idx} 
+                className={`status-step ${idx === activeStep ? 'active' : idx < activeStep ? 'completed' : ''}`}
+              >
+                <div className="status-step-icon">
+                  {idx < activeStep && "✓"}
+                </div>
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error Boundary */}
+        {error && (
+          <div className="error-boundary">
+            <div>
+              <strong style={{ color: "var(--error)" }}>Submission Error:</strong>
+              <p style={{ margin: "0.5rem 0", fontSize: "0.875rem" }}>{error}</p>
+            </div>
+            <button className="button" onClick={handleSubmit} style={{ background: "var(--error)" }}>
+              Retry Submission
+            </button>
+          </div>
+        )}
+
+        <div className="input-group" style={{ marginTop: "2rem" }}>
           <label style={{ textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.05em" }}>
             Your Answer
           </label>
@@ -114,7 +201,7 @@ export default function InterviewRoom() {
           {isSubmitting ? (
             <>
               <span className="loader"></span>
-              Transmitting to Backend...
+              Orchestrating AI...
             </>
           ) : (
             "Submit Answer"

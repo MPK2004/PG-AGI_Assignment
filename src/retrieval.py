@@ -172,4 +172,9 @@ BE BRUTAL AND ACCURATE."""
             temperature=0.1
         )
     except Exception as e:
-        return GraderOutput(score=0, feedback=f"Error during grading: {str(e)}", routing_action="NEXT_TOPIC")
+        print(f"CRITICAL: Grading failed with model {os.getenv('OPENROUTER_MODEL')}. Error: {str(e)}")
+        return GraderOutput(
+            score=0, 
+            feedback=f"Grading failed. This model might not support structured output reliably. Error: {str(e)}", 
+            routing_action="NEXT_TOPIC"
+        )
